@@ -48,8 +48,6 @@ def mean_squared_error_gd(y, tx, initial_w, max_iters, gamma):
         ws: a list of length max_iters containing the model parameters as numpy arrays of shape (2, ), for each iteration of GD
     """
     # Define parameters to store w and loss
-    ws = [initial_w]
-    losses = []
     w = initial_w
     for n_iter in range(max_iters):
         grad = compute_gradient(y, tx, w)
@@ -58,13 +56,12 @@ def mean_squared_error_gd(y, tx, initial_w, max_iters, gamma):
         w = w - gamma * grad
 
         # store w and loss
-        ws.append(w)
-        losses.append(loss)
         print(
             "GD iter. {bi}/{ti}: loss={l}, w0={w0}, w1={w1}".format(
                 bi=n_iter, ti=max_iters - 1, l=loss, w0=w[0], w1=w[1]
             )
         )
+    loss = compute_MSE(y, tx, w)
 
     return w, loss
 
@@ -161,8 +158,6 @@ def mean_squared_error_sgd(y, tx, initial_w, max_iters, gamma):
     """
 
     # Define parameters to store w and loss
-    ws = [initial_w]
-    losses = []
     w = initial_w
 
     batch_size = 1
@@ -175,15 +170,13 @@ def mean_squared_error_sgd(y, tx, initial_w, max_iters, gamma):
 
             w = w - gamma * grad
 
-            # store w and loss
-            ws.append(w)
-            losses.append(loss)
-
             print(
                 "SGD iter. {bi}/{ti}: loss={l}, w0={w0}, w1={w1}".format(
                     bi=n_iter, ti=max_iters - 1, l=loss, w0=w[0], w1=w[1]
                 )
             )
+
+    loss = compute_MSE(y, tx, w)
     return w, loss
 
 
@@ -331,6 +324,7 @@ def logistic_regression(y, tx, initial_w, max_iters, gamma):
             break
 
     print("loss={l}".format(l=calculate_loss(y, tx, w)))
+    loss = calculate_loss(y, tx, w)
     return w, loss
 
 
@@ -418,4 +412,5 @@ def reg_logistic_regression(y, tx, lambda_, initial_w, max_iters, gamma):
             break
 
     print("loss={l}".format(l=calculate_loss(y, tx, w)))
+    loss = calculate_loss(y, tx, w)
     return w, loss
