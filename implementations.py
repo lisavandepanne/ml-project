@@ -402,7 +402,7 @@ def reg_logistic_regression(y, tx, lambda_, initial_w, max_iters, gamma):
     # start the logistic regression
     for iter in range(max_iters):
         # get loss and update w.
-        lw, loss = learning_by_penalized_gradient(y, tx, w, gamma, lambda_)
+        w, loss = learning_by_penalized_gradient(y, tx, w, gamma, lambda_)
         # log info
         if iter % 100 == 0:
             print("Current iteration={i}, loss={l}".format(i=iter, l=loss))
