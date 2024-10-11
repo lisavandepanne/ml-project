@@ -337,7 +337,7 @@ def learning_by_gradient_descent(y, tx, w, gamma):
     return loss, w
 
 
-def logistic_regression_gradient_descent_demo(y, tx, initial_w, max_iters, gamma):
+def logistic_regression(y, tx, initial_w, max_iters, gamma):
     # init parameters
     threshold = 1e-8
     losses = []
@@ -434,9 +434,7 @@ def learning_by_penalized_gradient(y, tx, w, gamma, lambda_):
     return loss, w
 
 
-def logistic_regression_penalized_gradient_descent_demo(
-    y, tx, lambda_, initial_w, max_iters, gamma
-):
+def reg_logistic_regression(y, tx, lambda_, initial_w, max_iters, gamma):
     # init parameters
     threshold = 1e-8
     losses = []
