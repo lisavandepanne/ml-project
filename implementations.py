@@ -111,6 +111,7 @@ def batch_iter(y, tx, batch_size, num_batches=1, shuffle=True):
     for minibatch_y, minibatch_tx in batch_iter(y, tx, 32):
         <DO-SOMETHING>
     """
+
     data_size = len(y)  # NUmber of data points.
     batch_size = min(data_size, batch_size)  # Limit the possible size of the batch.
     max_batches = int(
@@ -170,7 +171,6 @@ def mean_squared_error_sgd(y, tx, initial_w, max_iters, gamma):
                     bi=n_iter, ti=max_iters - 1, l=loss
                 )
             )
-
     loss = compute_MSE(y, tx, w)
     return w, loss
 
@@ -223,6 +223,7 @@ def sigmoid(t):
     Returns:
         scalar or numpy array
     """
+
     return 1 / (1 + np.exp(-t))
 
 
@@ -298,6 +299,7 @@ def logistic_regression(y, tx, initial_w, max_iters, gamma):
         loss: scalar number
         w: shape=(D, )
     """
+
     # init parameters
     threshold = 1e-8
     prev_loss = float("inf")
@@ -378,6 +380,7 @@ def reg_logistic_regression(y, tx, lambda_, initial_w, max_iters, gamma):
         loss: scalar number
         w: shape=(D, ) optimal weights
     """
+
     # init parameters
     threshold = 1e-8
     prev_loss = float("inf")
