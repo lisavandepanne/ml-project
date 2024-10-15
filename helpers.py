@@ -24,7 +24,7 @@ def load_csv_data(data_path, sub_sample=False):
     print("test")
     ###################################################################
     with open(os.path.join(data_path, "x_train.csv")) as f:
-        headers_train = f.readline().strip().split(',')
+        headers_train = f.readline().strip().split(",")
     ###################################################################
 
     y_train = np.genfromtxt(
