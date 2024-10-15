@@ -253,7 +253,7 @@ def calculate_gradient(y, tx, w):
     """compute the gradient of loss.
 
     Args:
-        y:  shape=(N, )
+        y:  shape=(N, ) labels are 0 or 1
         tx: shape=(N, D)
         w:  shape=(D, )
 
@@ -270,7 +270,7 @@ def learning_by_gradient_descent(y, tx, w, gamma):
     Do one step of gradient descent using logistic regression. Return the loss and the updated w.
 
     Args:
-        y:  shape=(N, )
+        y:  shape=(N, ) labels are 0 or 1
         tx: shape=(N, D)
         w:  shape=(D, )
         gamma: float, the learning rate
@@ -289,7 +289,7 @@ def logistic_regression(y, tx, initial_w, max_iters, gamma):
     """Perform optimisation steps in logistic regression.
 
     Args:
-        y:  shape=(N, )
+        y:  shape=(N, ) labels are 0 or 1
         tx: shape=(N, D)
         inital_w:  shape=(D, )
         max_iters: int
@@ -318,8 +318,8 @@ def logistic_regression(y, tx, initial_w, max_iters, gamma):
         # Update previous loss
         prev_loss = loss
 
-    print("loss={l}".format(l=calculate_loss(y, tx, w)))
     loss = calculate_loss(y, tx, w)
+    print("loss={l}".format(l=loss))
     return w, loss
 
 
@@ -327,7 +327,7 @@ def penalized_logistic_regression(y, tx, w, lambda_):
     """return the loss and gradient.
 
     Args:
-        y:  shape=(N, )
+        y:  shape=(N, ) labels are 0 or 1
         tx: shape=(N, D)
         w:  shape=(D, )
         lambda_: scalar, the regularization term
@@ -349,7 +349,7 @@ def learning_by_penalized_gradient(y, tx, w, gamma, lambda_):
     Return the loss and updated w.
 
     Args:
-        y:  shape=(N, )
+        y:  shape=(N, ) labels are 0 or 1
         tx: shape=(N, D)
         w:  shape=(D, )
         gamma: scalar, the learning rate
@@ -369,7 +369,7 @@ def reg_logistic_regression(y, tx, lambda_, initial_w, max_iters, gamma):
     """Perform optimisation steps in logistic regression, with penalisation term (regularisation)
 
     Args:
-        y:  shape=(N, )
+        y:  shape=(N, ) labels are 0 or 1
         tx: shape=(N, D)
         lambda_: float, the regularization term
         inital_w:  shape=(D, )
@@ -399,6 +399,6 @@ def reg_logistic_regression(y, tx, lambda_, initial_w, max_iters, gamma):
         # Update previous loss
         prev_loss = loss
 
-    print("loss={l}".format(l=calculate_loss(y, tx, w)))
     loss = calculate_loss(y, tx, w)
+    print("loss={l}".format(l=loss))
     return w, loss
