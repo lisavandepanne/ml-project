@@ -111,6 +111,7 @@ def batch_iter(y, tx, batch_size, num_batches=1, shuffle=True):
     for minibatch_y, minibatch_tx in batch_iter(y, tx, 32):
         <DO-SOMETHING>
     """
+
     data_size = len(y)  # NUmber of data points.
     batch_size = min(data_size, batch_size)  # Limit the possible size of the batch.
     max_batches = int(
@@ -170,7 +171,6 @@ def mean_squared_error_sgd(y, tx, initial_w, max_iters, gamma):
                     bi=n_iter, ti=max_iters - 1, l=loss
                 )
             )
-
     loss = compute_MSE(y, tx, w)
     return w, loss
 
@@ -223,6 +223,7 @@ def sigmoid(t):
     Returns:
         scalar or numpy array
     """
+
     return 1 / (1 + np.exp(-t))
 
 
@@ -252,7 +253,7 @@ def calculate_gradient(y, tx, w):
     """compute the gradient of loss.
 
     Args:
-        y:  shape=(N, )
+        y:  shape=(N, ) labels are 0 or 1
         tx: shape=(N, D)
         w:  shape=(D, )
 
@@ -269,7 +270,7 @@ def learning_by_gradient_descent(y, tx, w, gamma):
     Do one step of gradient descent using logistic regression. Return the loss and the updated w.
 
     Args:
-        y:  shape=(N, )
+        y:  shape=(N, ) labels are 0 or 1
         tx: shape=(N, D)
         w:  shape=(D, )
         gamma: float, the learning rate
@@ -288,7 +289,7 @@ def logistic_regression(y, tx, initial_w, max_iters, gamma):
     """Perform optimisation steps in logistic regression.
 
     Args:
-        y:  shape=(N, )
+        y:  shape=(N, ) labels are 0 or 1
         tx: shape=(N, D)
         inital_w:  shape=(D, )
         max_iters: int
@@ -298,6 +299,7 @@ def logistic_regression(y, tx, initial_w, max_iters, gamma):
         loss: scalar number
         w: shape=(D, )
     """
+
     # init parameters
     threshold = 1e-8
     prev_loss = float("inf")
@@ -316,8 +318,8 @@ def logistic_regression(y, tx, initial_w, max_iters, gamma):
         # Update previous loss
         prev_loss = loss
 
-    print("loss={l}".format(l=calculate_loss(y, tx, w)))
     loss = calculate_loss(y, tx, w)
+    print("loss={l}".format(l=loss))
     return w, loss
 
 
@@ -325,7 +327,7 @@ def penalized_logistic_regression(y, tx, w, lambda_):
     """return the loss and gradient.
 
     Args:
-        y:  shape=(N, )
+        y:  shape=(N, ) labels are 0 or 1
         tx: shape=(N, D)
         w:  shape=(D, )
         lambda_: scalar, the regularization term
@@ -347,7 +349,7 @@ def learning_by_penalized_gradient(y, tx, w, gamma, lambda_):
     Return the loss and updated w.
 
     Args:
-        y:  shape=(N, )
+        y:  shape=(N, ) labels are 0 or 1
         tx: shape=(N, D)
         w:  shape=(D, )
         gamma: scalar, the learning rate
@@ -367,7 +369,7 @@ def reg_logistic_regression(y, tx, lambda_, initial_w, max_iters, gamma):
     """Perform optimisation steps in logistic regression, with penalisation term (regularisation)
 
     Args:
-        y:  shape=(N, )
+        y:  shape=(N, ) labels are 0 or 1
         tx: shape=(N, D)
         lambda_: float, the regularization term
         inital_w:  shape=(D, )
@@ -378,6 +380,7 @@ def reg_logistic_regression(y, tx, lambda_, initial_w, max_iters, gamma):
         loss: scalar number
         w: shape=(D, ) optimal weights
     """
+
     # init parameters
     threshold = 1e-8
     prev_loss = float("inf")
@@ -396,6 +399,6 @@ def reg_logistic_regression(y, tx, lambda_, initial_w, max_iters, gamma):
         # Update previous loss
         prev_loss = loss
 
-    print("loss={l}".format(l=calculate_loss(y, tx, w)))
     loss = calculate_loss(y, tx, w)
+    print("loss={l}".format(l=loss))
     return w, loss
