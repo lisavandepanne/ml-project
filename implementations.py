@@ -385,11 +385,13 @@ def reg_logistic_regression(y, tx, lambda_, initial_w, max_iters, gamma):
     threshold = 1e-8
     prev_loss = float("inf")
     w = initial_w
+    list_loss = np.zeros((max_iters))
 
     # start the logistic regression
     for iter in range(max_iters):
         # get loss and update w.
         w, loss = learning_by_penalized_gradient(y, tx, w, gamma, lambda_)
+        list_loss[iter] = loss
         # log info
         if iter % 100 == 0:
             print("Current iteration={i}, loss={l}".format(i=iter, l=loss))
