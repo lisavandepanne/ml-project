@@ -1,40 +1,6 @@
 import numpy as np
 from implementations import *
-
-
-def evaluate_performance(x, y, w):
-
-    # Calculate the predictions
-    y_pred = np.sign(x @ w)
-
-    # Check if all values in y_pred are either -1 or 1
-    if np.all((y_pred == -1) | (y_pred == 1)):
-        None
-        # print("All values are either -1 or 1.")
-    else:
-        raise ValueError("The array contains values other than -1 or 1.")
-
-    # Calculate accuracy
-    accuracy = np.mean(y == y_pred)
-    # print("Accuracy:", accuracy)
-
-    # Compute confusion matrix components
-    TP = np.sum((y == 1) & (y_pred == 1))
-    FP = np.sum((y == -1) & (y_pred == 1))
-    FN = np.sum((y == 1) & (y_pred == -1))
-
-    # Calculate Precision and Recall
-    precision = TP / (TP + FP) if (TP + FP) > 0 else 0
-    recall = TP / (TP + FN) if (TP + FN) > 0 else 0
-
-    # Calculate F1 Score
-    f1_score = (
-        2 * (precision * recall) / (precision + recall)
-        if (precision + recall) > 0
-        else 0
-    )
-
-    return y_pred, accuracy, precision, recall, f1_score
+from helpers import *
 
 
 def build_k_indices(y, k_fold, seed=1):
@@ -81,7 +47,7 @@ def cross_validation(y, x, k_indices, k, lambda_, a, penalty_factor, max_iters, 
     )
     loss_te = calculate_primal_objective(y_te, x_te, w_opt, lambda_, penalty_factor)
     y_pred, accuracy, precision, recall, f1_score_te = evaluate_performance(
-        x_te, y_te, w_opt
+        x_te, y_te, w_opt, model_labels={-1, 1}, limit=0
     )
     # ***************************************************
 

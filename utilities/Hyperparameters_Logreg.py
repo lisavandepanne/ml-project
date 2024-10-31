@@ -4,71 +4,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from implementations import *
-
-
-def evaluate_performance(x, y, w, limit):
-    """
-    Evaluates the performance of a binary classifier by calculating various metrics,
-    including accuracy, precision, recall, and F1 score.
-
-    Parameters:
-    x (np.ndarray): Input feature matrix (shape: [n_samples, n_features]).
-    y (np.ndarray): True binary labels (shape: [n_samples]).
-    w (np.ndarray): Weight vector for the model (shape: [n_features]).
-    limit (float): Threshold to convert predictions to binary classes (0 or 1).
-
-    Returns:
-    tuple: A tuple containing:
-        - y_pred (np.ndarray): Predicted binary labels (0 or 1) based on the threshold.
-        - accuracy (float): Ratio of correct predictions to total predictions.
-        - precision (float): Ratio of true positives to all predicted positives.
-        - recall (float): Ratio of true positives to all actual positives.
-        - f1_score (float): Harmonic mean of precision and recall, representing model balance.
-
-    Raises:
-    ValueError: If `y_pred` contains values other than 0 or 1 after applying the threshold.
-    """
-
-    # Calculate the predictions
-    y_pred = x @ w
-
-    # Apply threshold to convert predictions to binary classes
-    y_pred[y_pred <= limit] = 0
-    y_pred[y_pred > limit] = 1
-
-    # Check if all values in y_pred are either 0 or 1
-    if np.all((y_pred == 0) | (y_pred == 1)):
-        None
-        # print("All values are either 0 or 1.")
-    else:
-        raise ValueError("The array contains values other than 0 or 1.")
-
-    # Calculate accuracy
-    accuracy = np.mean(y == y_pred)
-    # print("Accuracy:", accuracy)
-
-    # Compute confusion matrix components
-    TP = np.sum((y == 1) & (y_pred == 1))
-    FP = np.sum((y == 0) & (y_pred == 1))
-    FN = np.sum((y == 1) & (y_pred == 0))
-
-    # Calculate Precision and Recall
-    precision = TP / (TP + FP) if (TP + FP) > 0 else 0
-    recall = TP / (TP + FN) if (TP + FN) > 0 else 0
-
-    # Calculate F1 Score
-    f1_score = (
-        2 * (precision * recall) / (precision + recall)
-        if (precision + recall) > 0
-        else 0
-    )
-
-    # Print metrics
-    # print("Precision:", precision)
-    # print("Recall (True positive rate):", recall)
-    # print("F1 Score:", f1_score)
-
-    return y_pred, accuracy, precision, recall, f1_score
+from helpers import *
 
 
 def build_k_indices(y, k_fold, seed=1):
@@ -145,7 +81,7 @@ def cross_validation_demo(x, y, k_fold, initial_w, lambda_, max_iters, gamma, li
             y, x, k_indices, i, lambda_, initial_w, max_iters, gamma
         )
         y_pred_tr, accuracy, precision, recall, f1_score = evaluate_performance(
-            x, y, w, limit
+            x, y, w, model_labels={0, 1}, limit=limit
         )
         f1 += f1_score
         loss_train += loss_tr

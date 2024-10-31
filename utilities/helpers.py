@@ -90,3 +90,60 @@ def submission(x_test, ids_test, limit, w_opt, name, model_labels):
     create_csv_submission(ids_test, y_pred, name)
 
     return y_pred
+
+
+def evaluate_performance(x, y, w, model_labels, limit):
+    if model_labels == {-1, 1}:
+        # Calculate the predictions
+        y_pred = np.sign(x @ w)
+
+        # Check if all values in y_pred are either -1 or 1
+        if np.all((y_pred == -1) | (y_pred == 1)):
+            pass
+        else:
+            raise ValueError("The array contains values other than -1 or 1.")
+
+        # Calculate accuracy
+        accuracy = np.mean(y == y_pred)
+
+        # Compute confusion matrix components
+        TP = np.sum((y == 1) & (y_pred == 1))
+        FP = np.sum((y == -1) & (y_pred == 1))
+        FN = np.sum((y == 1) & (y_pred == -1))
+
+    elif model_labels == {0, 1}:
+        # Calculate the predictions
+        y_pred = x @ w
+
+        # Apply threshold to convert predictions to binary classes
+        y_pred[y_pred <= limit] = 0
+        y_pred[y_pred > limit] = 1
+
+        # Check if all values in y_pred are either -1 or 1
+        if np.all((y_pred == 0) | (y_pred == 1)):
+            pass
+        else:
+            raise ValueError("The array contains values other than 0 or 1.")
+
+        # Calculate accuracy
+        accuracy = np.mean(y == y_pred)
+
+        # Compute confusion matrix components
+        TP = np.sum((y == 1) & (y_pred == 1))
+        FP = np.sum((y == 0) & (y_pred == 1))
+        FN = np.sum((y == 1) & (y_pred == 0))
+    else:
+        raise ValueError("model_labels should be either {-1, 1} or {0, 1}")
+
+    # Calculate Precision and Recall
+    precision = TP / (TP + FP) if (TP + FP) > 0 else 0
+    recall = TP / (TP + FN) if (TP + FN) > 0 else 0
+
+    # Calculate F1 Score
+    f1_score = (
+        2 * (precision * recall) / (precision + recall)
+        if (precision + recall) > 0
+        else 0
+    )
+
+    return y_pred, accuracy, precision, recall, f1_score
