@@ -1,8 +1,33 @@
+### This file is used to test different hyperparameters, and then selecting the best one
+
+
 import numpy as np
 import matplotlib.pyplot as plt
+from implementations import *
 
 
 def evaluate_performance(x, y, w, limit):
+    """
+    Evaluates the performance of a binary classifier by calculating various metrics,
+    including accuracy, precision, recall, and F1 score.
+
+    Parameters:
+    x (np.ndarray): Input feature matrix (shape: [n_samples, n_features]).
+    y (np.ndarray): True binary labels (shape: [n_samples]).
+    w (np.ndarray): Weight vector for the model (shape: [n_features]).
+    limit (float): Threshold to convert predictions to binary classes (0 or 1).
+
+    Returns:
+    tuple: A tuple containing:
+        - y_pred (np.ndarray): Predicted binary labels (0 or 1) based on the threshold.
+        - accuracy (float): Ratio of correct predictions to total predictions.
+        - precision (float): Ratio of true positives to all predicted positives.
+        - recall (float): Ratio of true positives to all actual positives.
+        - f1_score (float): Harmonic mean of precision and recall, representing model balance.
+
+    Raises:
+    ValueError: If `y_pred` contains values other than 0 or 1 after applying the threshold.
+    """
 
     # Calculate the predictions
     y_pred = x @ w
@@ -39,9 +64,9 @@ def evaluate_performance(x, y, w, limit):
     )
 
     # Print metrics
-    print("Precision:", precision)
-    print("Recall (True positive rate):", recall)
-    print("F1 Score:", f1_score)
+    # print("Precision:", precision)
+    # print("Recall (True positive rate):", recall)
+    # print("F1 Score:", f1_score)
 
     return y_pred, accuracy, precision, recall, f1_score
 
@@ -56,10 +81,6 @@ def build_k_indices(y, k_fold, seed=1):
 
     Returns:
         A 2D array of shape=(k_fold, N/k_fold) that indicates the data indices for each fold
-
-    >>> build_k_indices(np.array([1., 2., 3., 4.]), 2, 1)
-    array([[3, 2],
-           [0, 1]])
     """
     num_row = y.shape[0]
     interval = int(num_row / k_fold)  # nombre d'éléments qui seront dans chaque fold
@@ -72,6 +93,7 @@ def build_k_indices(y, k_fold, seed=1):
 
 
 def cross_validation(y, x, k_indices, k, lambda_, initial_w, max_iters, gamma):
+
     # ***************************************************
     # x_tr = np.array([])
     # y_tr = np.array([])
@@ -97,7 +119,7 @@ def cross_validation(y, x, k_indices, k, lambda_, initial_w, max_iters, gamma):
     return w, loss_tr, list_loss_tr, loss_te
 
 
-def cross_validation_demo(x, y, k_fold, lambda_, initial_w, max_iters, gamma):
+def cross_validation_demo(x, y, k_fold, initial_w, lambda_, max_iters, gamma, limit):
     """cross validation over regularisation parameter lambda.
 
     Args:
@@ -108,7 +130,9 @@ def cross_validation_demo(x, y, k_fold, lambda_, initial_w, max_iters, gamma):
         best_lambda : scalar, value of the best lambda
         best_rmse : scalar, the associated root mean squared error for the best lambda
     """
-
+    f1 = 0
+    loss_train = 0
+    loss_test = 0
     seed = 1
     k_fold = k_fold
     # split data in k fold
@@ -120,138 +144,64 @@ def cross_validation_demo(x, y, k_fold, lambda_, initial_w, max_iters, gamma):
         w, loss_tr, list_loss_tr, loss_te = cross_validation(
             y, x, k_indices, i, lambda_, initial_w, max_iters, gamma
         )
-        loss_tr += loss_tr
-        loss_te += loss_te
-    av_loss_tr = loss_tr / k_fold
-    av_loss_te = loss_te / k_fold
-    # ***************************************************
-    return w, av_loss_tr, av_loss_te
-
-
-def hyperparameters(
-    x_train,
-    y_train,
-    headers_train,
-    ratio_missing,
-    regularization_term,
-    learning_rate,
-    limits,
-    initial_w,
-    max_iters,
-    zero=False,
-    mean=False,
-    mode=False,
-    k_fold=None,
-):
-    results = []
-
-    for ratio in ratio_missing:
-        print(f"Ratio of missing data : {ratio}")
-        x_tr, x_val, y_tr, y_val, data_filled, remaining_headers = data_preprocess(
-            x_train,
-            y_train,
-            headers_train,
-            ratio_miss=ratio,
-            ratio_train=0.8,
-            standardization=True,
-            zero=zero,
-            mean=mean,
-            mode=mode,
-            hyper=True,
+        y_pred_tr, accuracy, precision, recall, f1_score = evaluate_performance(
+            x, y, w, limit
         )
-        for lambda_ in regularization_term:
-            for gamma in learning_rate:
-                if k_fold:
-                    w_opt, loss_opt, list_loss = cross_validation_demo(
-                        x_tr, y_tr, k_fold, lambda_, initial_w, max_iters, gamma
-                    )
-                else:
-                    w_opt, loss_opt, list_loss = reg_logistic_regression_hyper(
-                        y_tr, x_tr, lambda_, initial_w, max_iters, gamma
-                    )
-                for limit in limits:
-                    y_pred_tr, accuracy_tr, precision_tr, recall_tr, f1_score_tr = (
-                        evaluate_performance(x_tr, y_tr, w_opt, limit)
-                    )
-                    (
-                        y_pred_val,
-                        accuracy_val,
-                        precision_val,
-                        recall_val,
-                        f1_score_val,
-                    ) = evaluate_performance(x_val, y_val, w_opt, limit)
+        f1 += f1_score
+        loss_train += loss_tr
+        loss_test += loss_te
+    av_loss_tr = loss_train / k_fold
+    av_loss_te = loss_test / k_fold
+    av_f1_score = f1 / k_fold
+    # ***************************************************
+    return av_f1_score, av_loss_tr, av_loss_te
 
-                    results.append(
-                        {
-                            "ratio_missing": ratio,
-                            "regularization_term": lambda_,
-                            "learning_rate": gamma,
-                            "limit": limit,
-                            "loss_opt": loss_opt,
-                            "list_loss": list_loss,
-                            "w_opt": w_opt,
-                            "accuracy_tr": accuracy_tr,
-                            "precision_tr": precision_tr,
-                            "recall_tr": recall_tr,
-                            "f1_score_tr": f1_score_tr,
-                            "accuracy_val": accuracy_val,
-                            "precision_val": precision_val,
-                            "recall_val": recall_val,
-                            "f1_score_val": f1_score_val,
-                        }
-                    )
+
+def Hyperparameters(
+    x_tr, y_tr, k_fold, max_iters, regularization_term, learning_rate, limits, initial_w
+):
+
+    results = []
+    for lambda_ in regularization_term:
+        for gamma in learning_rate:
+            for limit in limits:
+                av_f1_score, av_loss_tr, av_loss_te = cross_validation_demo(
+                    x_tr, y_tr, k_fold, initial_w, lambda_, max_iters, gamma, limit
+                )
+                results.append(
+                    {
+                        "regularization_term": lambda_,
+                        "learning_rate": gamma,
+                        "limit": limit,
+                        "av_f1_score": av_f1_score,
+                    }
+                )
 
     return results
 
 
-def analyze_results(results):
+def Get_best_results(results):
+    # Initialize variables to track the best F1-score and corresponding parameters
+    best_f1_score = 0
+    best_params = None
 
-    # Find the configuration with the lowest loss_opt
-    lowest_loss_entry = min(results, key=lambda x: x["loss_opt"])
+    # Loop through the results to find the best F1-score on the validation set
+    for result in results:
+        f1_score_val = result["av_f1_score"]
 
-    # Extract parameters corresponding to the lowest loss
-    target_gamma = lowest_loss_entry["learning_rate"]
-    target_lambda = lowest_loss_entry["regularization_term"]
-    target_ratio = lowest_loss_entry["ratio_missing"]
+        # Update if a new best F1-score is found
+        if f1_score_val > best_f1_score:
+            best_f1_score = f1_score_val
+            best_params = {
+                "regularization_term": result["regularization_term"],
+                "learning_rate": result["learning_rate"],
+                "limit": result["limit"],
+            }
 
-    print(f"Lowest loss_opt found with parameters:")
-    print(
-        f"Gamma: {target_gamma}, Lambda: {target_lambda}, Ratio: {target_ratio}, Loss: {lowest_loss_entry['loss_opt']}"
-    )
-
-    # Filter the results for the identified parameters
-    filtered_results = [
-        res
-        for res in results
-        if res["learning_rate"] == target_gamma
-        and res["regularization_term"] == target_lambda
-        and res["ratio_missing"] == target_ratio
-    ]
-
-    filtered_results = sorted(filtered_results, key=lambda x: x["limit"])
-
-    # Extract the limit values and corresponding training metrics
-    limits = [res["limit"] for res in filtered_results]
-    accuracy_tr_values = [res["accuracy_tr"] for res in filtered_results]
-    precision_tr_values = [res["precision_tr"] for res in filtered_results]
-    recall_tr_values = [res["recall_tr"] for res in filtered_results]
-    f1_score_tr_values = [res["f1_score_tr"] for res in filtered_results]
-
-    # Plot each metric as a function of 'limit'
-    plt.figure(figsize=(10, 6))
-    plt.plot(limits, accuracy_tr_values, marker="o", label="Accuracy")
-    plt.plot(limits, precision_tr_values, marker="o", label="Precision")
-    plt.plot(limits, recall_tr_values, marker="o", label="Recall")
-    plt.plot(limits, f1_score_tr_values, marker="o", label="F1 Score")
-
-    plt.xlabel("Limit")
-    plt.ylabel("Metric Value")
-    plt.title(
-        f"Variation of Training Metrics with Limit\n(gamma={target_gamma}, lambda={target_lambda}, ratio={target_ratio})"
-    )
-    plt.legend()
-    plt.grid(True)
-    plt.show()
+    # Output the best F1-score and corresponding parameters
+    print("Best F1-Score:", best_f1_score)
+    print("Best Parameters and Metrics:", best_params)
+    return best_f1_score, best_params
 
 
 # same function as in implementations but without the prints

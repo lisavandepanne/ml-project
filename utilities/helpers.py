@@ -76,3 +76,17 @@ def create_csv_submission(ids, y_pred, name):
         writer.writeheader()
         for r1, r2 in zip(ids, y_pred):
             writer.writerow({"Id": int(r1), "Prediction": int(r2)})
+
+
+def submission(x_test, ids_test, limit, w_opt, name, model_labels):
+    if model_labels == {0, 1}:
+        y_pred = x_test @ w_opt
+        y_pred[y_pred <= limit] = 0
+        y_pred[y_pred > limit] = 1
+        y_pred = np.where(y_pred == 0, -1, y_pred)
+    elif model_labels == {-1, 1}:
+        y_pred = np.sign(x_test @ w_opt)
+
+    create_csv_submission(ids_test, y_pred, name)
+
+    return y_pred
