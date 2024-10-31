@@ -1,4 +1,8 @@
 import numpy as np
+import random
+import time
+from datetime import datetime
+import matplotlib.pyplot as plt
 
 
 def compute_MSE(y, tx, w):
@@ -404,3 +408,129 @@ def reg_logistic_regression(y, tx, lambda_, initial_w, max_iters, gamma):
     loss = calculate_loss(y, tx, w)
     print("loss={l}".format(l=loss))
     return w, loss
+
+
+def calculate_primal_objective(y, X, w, lambda_, penalty_factor=1.0):
+    """Compute the primal objective with a higher penalty for misclassifying +1 labels.
+
+    Args:
+        X: The full dataset matrix, shape = (num_examples, num_features)
+        y: The corresponding +1 or -1 labels, shape = (num_examples)
+        w: Weight vector, shape = (num_features)
+        lambda_: Regularization parameter
+        penalty_factor: Penalty factor for the +1 class (default 1.0)
+
+    Returns:
+        Scalar representing the cost (non-negative).
+    """
+
+    losses = np.maximum(1 - y * (X @ w), 0)
+    return np.mean(losses) + lambda_ * w @ w / 2
+
+
+def calculate_stochastic_gradient(
+    y, X, w, lambda_, n, num_examples, penalty_factor=1.0
+):
+    """Compute the stochastic gradient of loss plus regularizer with class penalty.
+
+    Args:
+        X: Dataset matrix, shape = (num_examples, num_features)
+        y: Corresponding +1 or -1 labels, shape = (num_examples)
+        w: Weight vector, shape = (num_features)
+        lambda_: Regularization parameter
+        n: Index of the sampled datapoint
+        num_examples: Number of examples in the dataset
+        penalty_factor: Penalty factor for the +1 class (default 1.0)
+
+    Returns:
+        Gradient vector, shape = (num_features)
+    """
+    xn = X[n, :]
+    yn = y[n]
+
+    grad = lambda_ * w
+    if yn * (xn @ w) < 1:
+        penalty = penalty_factor if yn == 1 else 1.0
+        grad -= penalty * yn * xn
+
+    return grad
+
+
+def calculate_accuracy(y, X, w):
+    """Compute accuracy on the given dataset (X, y) using model weights w.
+
+    Args:
+        X: Full dataset matrix, shape = (num_examples, num_features)
+        y: Corresponding +1 or -1 labels, shape = (num_examples)
+        w: Weight vector, shape = (num_features)
+
+    Returns:
+        Scalar between 0 and 1 representing accuracy.
+    """
+    y_pred = np.sign(X @ w)
+    return np.mean(y_pred == y)
+
+
+def sgd_for_svm(
+    y,
+    X,
+    max_iter,
+    gamma,
+    lambda_,
+    a,
+    penalty_factor=1.0,
+    plot=False,
+    time=False,
+):
+    # Define a set of checkpoints within the range of max_iter
+    xs = np.unique(np.round(np.logspace(0, np.log10(max_iter), min(max_iter, 100))))[
+        :-1
+    ]  # Checkpoints
+
+    # Initialize the problem dimensions and model parameters
+    num_examples, num_features = X.shape
+    w = np.zeros(num_features)  # Initialize weights to zero
+    costs = []  # List to store primal objective cost at each checkpoint
+    if time:
+        start = time.time()  # Record start time for training duration calculation
+
+    # Start the SGD loop for a maximum of max_iter iterations
+    for it in range(max_iter):
+        # Randomly select one example for stochastic gradient calculation
+        n = random.randint(0, num_examples - 1)
+
+        # Calculate the stochastic gradient with class penalty
+        grad = calculate_stochastic_gradient(
+            y, X, w, lambda_, n, num_examples, penalty_factor
+        )
+
+        # Update weights using the SGD update rule
+        w -= gamma / (it + 1) ** a * grad
+
+        # Calculate the primal objective (current cost) with the updated weights
+        cost = calculate_primal_objective(y, X, w, lambda_, penalty_factor)
+
+        # Log the cost if the current iteration is in the list of checkpoints
+        if it in xs:
+            costs += [cost]
+
+    if time:
+        end = time.time()  # Record the end time of training
+        # Print final training accuracy and training duration
+        print(
+            "Final training accuracy = {l} %".format(
+                l=np.round(100 * calculate_accuracy(y, X, w), 2)
+            )
+        )
+        print("Training time: " + str(np.round(end - start, 1)) + " seconds ")
+
+    if plot:
+        # Plot the primal objective cost against the number of iterations (linear scale)
+        plt.figure()
+        plt.title("SGD on primal objective")
+        plt.plot(xs[: len(costs)], costs)  # Linear plot of cost values over iterations
+        plt.xlabel("Number of iterations")
+        plt.ylabel("Primal objective")
+        plt.show()
+
+    return w, calculate_primal_objective(y, X, w, lambda_, penalty_factor)
