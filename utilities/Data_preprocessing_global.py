@@ -264,6 +264,41 @@ def unique_values(data, column_name, headers):
     return unique_values
 
 
+# After analysing every feature, a sample of the rules for data transformation are given below and transcribed in the function replace_specific_values:
+
+# DIABETE3 replace 2 by 1, replace 3, 4, 7, 9 by 0
+# SMOKDAY2 replace 2 by 1, replace 3, 7, 9 by 0
+# USENOW3 replace 2 by 1, replace 3, 7, 9 by 0
+# ALCDAY5 replace 777, 888, 999 by 0
+# AVEDRNK replace 77, 99 by 0
+# DRNK3GE5 replace 77, 88, 99 by 0
+# PREDIAB1 replace 2 by 1, replace 3, 7, 9 by 0
+# BLDSUGAR if starts by 1, two last*365. If starts by 2, two last*52. If starts by 3, two last*12, if starts by 4, two last. If > 499, 0.
+# DOCTDIAB if >76, replace by 0
+# FC60_ replace 99900 by average of rest
+# Some sets have 1,2,3,4,5,6,7,9 should replace the 9
+# MARITAL if not 1, replace by 0
+# PHYSHLTH replace 88, 77, 99 by 0
+# POORHLTH replace 88, 77, 99 by 0
+# PERSDOC2 replace 2 by 1, replace 3, 7, 9 by 0
+# SEX replace 2 by 0
+# EDUCA replace 9 by 0
+# INCOME2 replace 77 and 99 by 4
+# WEIGHT2 if starts by 9, replace by 162
+# LASTSMK2 replace 77, 99 by Nan
+# MAXDRNKS replace 77, 99 by 0
+# FRUITJU1 if >= 300 replace by 0, if < 300 replace by 1
+# FRUIT1 if >= 300 replace by 0, if < 300 replace by 1
+# FVBEANS if >= 300 replace by 0, if < 300 replace by 1
+# FVORANG if >= 300 replace by 0, if < 300 replace by 1
+# VEGETAB1 if >= 300 replace by 0, if < 300 replace by 1
+# EXERHMM1 replace by 1, 2, 3, 4 if 1<30<100<200
+# JOINPAIN replace 77 and 99 by 0
+# _ASTHMS1 replace 2 by 1, replace 3, 9 by 0
+# _PRACE1 one hot encoding
+# _MRACE1 one hot encoding
+
+
 def replace_specific_values(old_data, headers):
     """
     Iterates through each column in the dataset and performs an action if the unique values of the column match the target values.

@@ -1,6 +1,6 @@
 import numpy as np
 from implementations import *
-from helpers import *
+from utilities.helpers import *
 
 
 def build_k_indices(y, k_fold, seed=1):
